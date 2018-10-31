@@ -6,6 +6,8 @@ var marker; //マーカー
 var popup = L.popup();  //ポップアップ
 var oldLat;   //最初期の緯度
 var oldLon;   //最初期の経度
+var newLat = 0; //最後に送信する緯度
+var newLon = 0; //最後に送信する経度
 
 function onPageLoad() {
 
@@ -20,13 +22,11 @@ function onPageLoad() {
 function drawMap() {
 
     //地図の表示
-    var mymap = L.map('mapid', {
-        maxZoom: 24,
-        minZoom: 10,
-    }).setView(mapInitLatLng, 11);
+    mymap = L.map('mapid');
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 20,
+        minZoom: 11,
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, '
     }).addTo(mymap);
 
@@ -34,11 +34,9 @@ function drawMap() {
     function onLocationFound(e) {
         //現段階（10月ではまだ住所変換できてないので緯度・経度のまま）
         marker = L.marker(e.latlng).addTo(mymap).bindPopup("現在地\n" + e.latlng).openPopup();
-        inputLocation(e.coords.latitude,e.coords.longitude);
-        oldLat = 42.828816;
-        oldLon = 141.650705;
-        // oldLat = e.coords.latitude;
-        // oldLon = e.coords.longitude;
+        //↑の下に以下の二行書けば取得できる　　inputはさむとできない　原因はわからん
+        newLat = e.latlng.lat; //緯度取得
+        newLon = e.latlng.lng; // 経度取得
     }
 
     function onLocationError(e) {
@@ -51,14 +49,16 @@ function drawMap() {
         //すでにあるMarkerを削除して、新しいMarkerを設置
         mymap.removeLayer(marker);
         marker = L.marker(e.latlng).addTo(mymap).bindPopup(e.latlng.toString()).openPopup();
-        inputLocation(e.coords.latitude,e.coords.longitude);
+        //↑の下に以下の二行書けば取得できる　　inputはさむとできない　原因はわからん
+        newLat = e.latlng.lat; //緯度取得
+        newLon = e.latlng.lng; //経度取得
     }
 
     mymap.on('locationfound', onLocationFound);
     mymap.on('locationerror', onLocationError);
     mymap.on('click', onMapClick);
 
-    mymap.locate({setView: true, maxZoom: 16, timeout: 20000});
+    mymap.locate({setView: true, maxZoom: 16, minZoom: 13, timeout: 20000});
 
 }
 
@@ -71,7 +71,11 @@ function changeSelect() {
 
     select2.options.length = 0; // 選択肢の数がそれぞれに異なる場合、これが重要
 
-    if (select1.options[select1.selectedIndex].value == "舗装") {
+    if (select1.options[select1.selectedIndex].value == "") {
+        select2.options[0] = new Option("先に報告種別を選択してください");
+    }
+
+    else if (select1.options[select1.selectedIndex].value == "舗装") {
         select2.options[0] = new Option("道路に穴が空いています");
         select2.options[1] = new Option("道路が爆発しています");
         select2.options[2] = new Option("その他");
@@ -99,7 +103,12 @@ function getFilename() {
     var f_name = array[array.length - 1];
     //alert(f_name);
     document.getElementsByName('filename').value = f_name;
-    alert(document.getElementsByName('filename').value);
+    //alert(document.getElementsByName('filename').value);
+
+    //hiddenに緯度と経度を入れる
+    document.getElementById('lat').value = newLat;
+    document.getElementById('lng').value = newLon;
+
     document.report.submit();
 }
 
@@ -109,41 +118,54 @@ function checkFileName() {
 
     var obj1 = document.getElementById('file');
 
-    obj1.addEventListener('change', function(evt){
+    obj1.addEventListener('change', function (evt) {
         var file = evt.target.files;
-        alert(file[0].name + "を取得しました。");
+        //alert(file[0].name + "を取得しました。");
         document.report.filename.value = file[0].name;
-    },false);
+    }, false);
 
 }
 
-//--------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------この２つはつかいません-----------------------------------------------
 //位置情報をHiddenにつっこむ(うまくいかない. Listenerじゃないとダメです)
-function inputLocation(latitude,longitude) {
+function inputLocation(latitude, longitude) {
 
+    /*
     if (latitude != oldLat || longitude != oldLon) {
         document.report.location.value = "緯度：" + latitude + ", 経度：" + longitude;
         oldLat = latitude;
         oldLon = longitude;
     }
+    */
+}
+
+//できない
+function inputLocation2(latitude, longitude) {
+
+    marker.addEventListener('change', function (e) {
+        //マーカーが変わった？ときのイベント
+        document.report.location.value = latitude + " ," + longitude;
+    });
+
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 //現在位置の再取得ボタン用関数
-function setCurLocation(){
-    if (navigator.geolocation == false){
+function setCurLocation() {
+    if (navigator.geolocation == false) {
         alert('現在地を取得できませんでした。');
         return;
     }
 
     function success(e) {
         mymap.removeLayer(marker);
-        var lat  = e.coords.latitude;
+        var lat = e.coords.latitude;
         var lng = e.coords.longitude;
         mymap.setView([lat, lng], 15);
-        marker = L.marker([lat,lng]).addTo(mymap).bindPopup('現在地\n緯度：' + lat + "\n経度：" + lng).openPopup();
+        marker = L.marker([lat, lng]).addTo(mymap).bindPopup('現在地\n緯度：' + lat + "\n経度：" + lng).openPopup();
         //追加
-        inputLocation(lat,lng);
+        newLat = lat;
+        newLon = lng;
     };
 
     function error() {
@@ -152,3 +174,25 @@ function setCurLocation(){
 
     navigator.geolocation.getCurrentPosition(success, error);
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+//地図の表示切り替え
+function Display(no) {
+        document.getElementById("mapid").style.display = "block";
+
+}
+
+$(function(){
+    $(".accordionbox dt").on("click", function() {
+        $(this).next().slideToggle();
+        // activeが存在する場合
+        if ($(this).children(".accordion_icon").hasClass('active')) {
+            // activeを削除
+            $(this).children(".accordion_icon").removeClass('active');
+        }
+        else {
+            // activeを追加
+            $(this).children(".accordion_icon").addClass('active');
+        }
+    });
+});
