@@ -3,19 +3,28 @@
 * */
 var mymap;  //マップ
 var marker; //マーカー
-var popup = L.popup();  //ポップアップ
-var oldLat;   //最初期の緯度
-var oldLon;   //最初期の経度
 var newLat = 0; //最後に送信する緯度
 var newLon = 0; //最後に送信する経度
+var userName = null;
+var type = "type";
+var category = "category";
+var detail = "detail";
+var latitude = "lat";
+var longitude = "lng";
 
-function onPageLoad() {
+
+window.onload = function (e) {
 
     //初期設定
     drawMap();
     changeSelect();
+    load_cookie();
 
-}
+    //LIFF init
+    liff.init(function (data) {
+        initApp(data);
+    });
+};
 
 //--------------------------------------------------------------------------------------------------------------------
 //地図の制御
@@ -25,8 +34,8 @@ function drawMap() {
     mymap = L.map('mapid');
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 20,
-        minZoom: 11,
+        maxZoom: 18,
+        minZoom: 13,
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, '
     }).addTo(mymap);
 
@@ -36,11 +45,15 @@ function drawMap() {
         marker = L.marker(e.latlng).addTo(mymap).bindPopup("現在地\n" + e.latlng).openPopup();
         //↑の下に以下の二行書けば取得できる　　inputはさむとできない　原因はわからん
         newLat = e.latlng.lat; //緯度取得
-        newLon = e.latlng.lng; // 経度取得
+        newLon = e.latlng.lng; //経度取得
     }
 
     function onLocationError(e) {
-        alert("現在地を取得できませんでした。" + e.message);
+        //alert("現在地を取得できませんでした。\nブラウザまたは本体の位置情報設定を見直してください。" + e.message);
+        alert("現在の位置情報が取得できないため、\n現在位置を\"千歳駅\"に設定します。")
+        marker = L.marker([42.8281, 141.652328]).addTo(mymap).bindPopup("千歳駅").openPopup();
+        newLat = 42.8281;
+        newLon = 141.652328;
     }
 
     function onMapClick(e) {
@@ -58,7 +71,8 @@ function drawMap() {
     mymap.on('locationerror', onLocationError);
     mymap.on('click', onMapClick);
 
-    mymap.locate({setView: true, maxZoom: 16, minZoom: 13, timeout: 20000});
+    //Androidで位置情報が取れないやつ回避
+    mymap.locate({setView: true, maxZoom: 16, minZoom: 13, timeout: 20000, enableHighAccuracy: true});
 
 }
 
@@ -71,11 +85,7 @@ function changeSelect() {
 
     select2.options.length = 0; // 選択肢の数がそれぞれに異なる場合、これが重要
 
-    if (select1.options[select1.selectedIndex].value == "") {
-        select2.options[0] = new Option("先に報告種別を選択してください");
-    }
-
-    else if (select1.options[select1.selectedIndex].value == "舗装") {
+    if (select1.options[select1.selectedIndex].value == "舗装") {
         select2.options[0] = new Option("道路に穴が空いています");
         select2.options[1] = new Option("道路が爆発しています");
         select2.options[2] = new Option("その他");
@@ -109,7 +119,7 @@ function getFilename() {
     document.getElementById('lat').value = newLat;
     document.getElementById('lng').value = newLon;
 
-    document.report.submit();
+    //document.report.submit();
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -153,7 +163,7 @@ function inputLocation2(latitude, longitude) {
 //現在位置の再取得ボタン用関数
 function setCurLocation() {
     if (navigator.geolocation == false) {
-        alert('現在地を取得できませんでした。');
+        alert('現在地を取得できませんでした。\n位置情報の設定を見直してください。');
         return;
     }
 
@@ -166,33 +176,121 @@ function setCurLocation() {
         //追加
         newLat = lat;
         newLon = lng;
-    };
+    }
 
     function error() {
-        alert('現在地を取得できませんでした。');
-    };
+        alert("現在の位置情報が取得できないため、\n現在位置を\"千歳駅\"に設定します。");
+        marker = L.marker([42.8281, 141.652328]).addTo(mymap).bindPopup("千歳駅").openPopup();
+        newLat = 42.8281;
+        newLon = 141.652328;
+    }
 
-    navigator.geolocation.getCurrentPosition(success, error);
+    navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true});
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 //地図の表示切り替え
-function Display(no) {
-        document.getElementById("mapid").style.display = "block";
 
+function Display(no) {
+    if (no == "no1") {
+        document.getElementById("mapid").style.display = "block";
+        document.getElementById("maphide").style.display = "none";
+    } else if (no == "no2") {
+        document.getElementById("mapid").style.display = "none";
+        document.getElementById("maphide").style.display = "block";
+    }
 }
 
-$(function(){
-    $(".accordionbox dt").on("click", function() {
-        $(this).next().slideToggle();
-        // activeが存在する場合
-        if ($(this).children(".accordion_icon").hasClass('active')) {
-            // activeを削除
-            $(this).children(".accordion_icon").removeClass('active');
-        }
-        else {
-            // activeを追加
-            $(this).children(".accordion_icon").addClass('active');
+$(function () {
+    $('.accbox label').prevAll().hide();
+    $('.accbox label').click(function () {
+        if ($(this).prevAll().is(':hidden')) {
+            $(this).prevAll().slideDown();
+            $(this).text('close').addClass('close');
+        } else {
+            $(this).prevAll().slideUp();
+            $(this).text('Open').removeClass('close');
         }
     });
 });
+
+(function ($) {
+// 読み込んだら開始
+   $(function () {
+
+// アコーディオン
+        $(".accordion").each(function () {
+            var accordion = $(this);
+            $(this).find(".switch").click(function () {
+//$("> .switch", this).click(function() { // 上段の別の書き方
+                var targetContentWrap = $(this).next(".contentWrap");
+                if (targetContentWrap.css("display") === "none") {
+                    accordion.find(".contentWrap").slideUp();
+                    accordion.find(".switch.open").removeClass("open");
+                }
+                targetContentWrap.slideToggle();
+                $(this).toggleClass("open");
+            });
+        });
+
+    });
+})(jQuery);
+
+
+//-------------------------------------------------------------------------------------------------------------------
+//LINEid
+function initApp(data) {
+    //alert("init");
+    document.getElementById('lineId').value = data.context.userId;
+    //alert(document.getElementById('lineId').value);
+    liff.getProfile().then(function (profile) {
+        userName = profile.displayName;
+        //alert(userName);
+    }).catch(function () {
+        alert('Eroor! getting DisplayName failed');
+    });
+
+    document.getElementById("sendmessagebutton").addEventListener('click', function (ev) {
+        type = document.report.type.value;
+        category = document.report.category.value;
+        detail = document.report.detail.value;
+        latitude = newLat;
+        longitude = newLon;
+        sendMessage();
+    });
+
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------------------------------
+//sendMessage
+function sendMessage() {
+
+    var report = "種別：" + type + "\n"
+        + "内容：" + category + "\n"
+        + "詳細：" + detail + "\n"
+        + "緯度 / 経度：" + latitude + " / " + longitude;
+
+    //alert('send click');
+    if (navigator.userAgent.indexOf("Line") !== -1) {
+        //alert('Agent: LINE');
+        //LINEにテキストを送信
+        liff.sendMessages([
+            {
+                type: 'text',
+                text: report
+            }
+        ]).then(function () {
+            window.alert("トークに流したゾ");
+            liff.closeWindow();
+        }).catch(function () {
+            window.alert("トークに流せなかった");
+        });
+    } else {
+        console.log("もんだいない");
+    }
+}
+
+//-------------------------------------------------------------------------------------------------------------------

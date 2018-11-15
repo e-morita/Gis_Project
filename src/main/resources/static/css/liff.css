@@ -101,28 +101,42 @@ label > input {
     text-align: center;
 }
 
-/*------*/
+/*--*/
 .accbox {
     margin: 2em 0;
     padding: 0;
-    max-width: 400px;/*最大幅*/
+    max-width: 400px; /*最大幅*/
+}
+
+/*ラベル*/
+.accbox {
+    margin: 2em 0;
+    padding: 0;
+    max-width: 400px; /*最大幅*/
 }
 
 /*ラベル*/
 .accbox label {
     display: block;
     margin: 1.5px 0;
-    padding : 11px 12px;
-    color :;
+    padding: 13px 12px;
+    color: #ffba47;
     font-weight: bold;
-    background :#85baef;
-    cursor :pointer;
+    background: #fff2cc;
+    cursor: pointer;
     transition: all 0.5s;
+}
+
+/*アイコンを表示*/
+.accbox label:before {
+    content: '\f054';
+    font-family: 'FontAwesome';
+    padding-right: 8px;
 }
 
 /*ラベルホバー時*/
 .accbox label:hover {
-    background :#85baef;
+    background: #ffe9a9;
 }
 
 /*チェックは隠す*/
@@ -140,10 +154,66 @@ label > input {
 }
 
 /*クリックで中身表示*/
-.cssacc:checked + .accshow {
+.cssacc:checked + label + .accshow {
     height: auto;
     padding: 5px;
-    background: #eaeaea;
+    background: #fff5eb;
     opacity: 1;
 }
 
+.accbox .accshow p {
+    margin: 15px 10px
+}
+
+/*アイコンを入れ替える*/
+.cssacc:checked + label:before {
+    content: '\f078';
+}
+
+/*----------------------------------------*/
+.displayNone {
+    display: none;
+}
+
+.accordion li {
+    border-bottom: 1px solid #ccc;
+    padding: 10px;
+}
+
+.accordion a {
+    display: block;
+}
+
+.contentWrap {
+    margin: 10px;
+}
+
+.switch {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 10px 40px 10px 10px;
+    font-size: 14px;
+    background: #eee;
+    border-bottom: 1px solid #ccc;
+    position: relative;
+}
+
+.switch:after {
+    content: "+";
+    position: absolute;
+    right: 10px;
+    top: -100%;
+    bottom: -100%;
+    margin: auto;
+    font-size: 16px;
+    height: 16px;
+    -moz-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg);
+    font-family: sans-serif;
+}
+
+.switch.open:after {
+    content: "x";
+}
