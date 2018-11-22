@@ -9,8 +9,9 @@
     <style type="text/css">
         <!--
         #mapid {
-            height: 400px;
-            width: 350px;
+            height: 445px;
+            width: 100%;
+            border-radius: 0 0 9px 9px;
         }
 
         -->
@@ -29,6 +30,7 @@
                 <p class="title">報告状況投稿ページ</p>
             </td>
         </tr>
+
         <tr>
             <td>
                 <p class="font">
@@ -50,6 +52,7 @@
                 </p>
             </td>
         </tr>
+
         <!------------------------------報告内容------------------------------>
         <tr>
             <td>
@@ -57,16 +60,15 @@
                     <label for="category">報告内容</label>
                     <span class="required">&nbsp;必須&nbsp;</span>
                     <tb>
-                        <select class="box" id="category" name="category" required>
-                        </select>
+                        <select class="box" id="category" name="category" required/>
                     </tb>
                 </p>
             </td>
         </tr>
         <!------------------------------詳細記入------------------------------>
+
         <tr>
             <td>
-                <p></p>
                 <label class="font">詳細記入</label>
                 <span class="any">&nbsp;任意&nbsp;</span>
                 <tb>
@@ -74,49 +76,40 @@
                               rows="5"></textarea>
                 </tb>
             </td>
-
         </tr>
+
     </table>
     <table id="table2">
 
         <!--------------------地図の表示・非表示-------------------->
+        <div class="accbox">
+            <!--ラベル1-->
+            <label for="label1">Map</label>
+            <input type="checkbox" id="label1" class="cssacc"/>
 
-        <amp-accordion>
-            <section expanded>
-                <div class="accordion">
-                    <p class="switch">地図でろや〜</p>
-                    <div class="contentWrap displayNone">
-                        <div id="mapid"></div>
-                        <div id="maphide" style="display: none;"></div>
-                        <!--<input type="button" id="currentLocation" value="現在の位置情報を取得する" onclick="setCurLocation()">-->
-                        <!--&lt;!&ndash;JSで取得した位置情報を送信するためのHIDDEN&ndash;&gt;-->
-                        <!--<input type="hidden" name="lat" id="lat" value="Latitude">-->
-                        <!--<input type="hidden" name="lng" id="lng" value="Longitude">-->
-                    </div>
-                </div><!-- accordion -->
-            </section>
-        </amp-accordion>
-
-
-        <!-- 1つ目のコンテンツ -->
-
-
-        <!------------------------------画像の選択ボタン------------------------------>
-        <div>
-            <label class="photo" for="file">
-                <input type="file" id="file" name="file" accept="image/*" onchange="checkFileName()">
-                <input type="hidden" name="filename" value="image">
-            </label>
-
-            <div class="button_font">画像選択</div>
+            <div class="accshow">
+                <!--ここに隠す中身-->
+                <div id="mapid"></div>
+                <div id="maphide" style="display: none;"></div>
+                <!--<input type="button" id="currentLocation" value="現在の位置情報を取得する" onclick="setCurLocation()">-->
+                <!--&lt;!&ndash;JSで取得した位置情報を送信するためのHIDDEN&ndash;&gt;-->
+                <!--<input type="hidden" name="lat" id="lat" value="Latitude">-->
+                <!--<input type="hidden" name="lng" id="lng" value="Longitude">-->
+            </div>
         </div>
 
+        <!--------------------サムネ表示-------------------->
+
+        <form action="index.php" method="post" enctype="multipart/form-data" id="form"/>
+        <div id="results"/>
 
         <tr>
             <div>
                 <button class="square_btn" id="sendmessagebutton" onclick="save_cookie()">報告する</button>
             </div>
         </tr>
+
+        <!--------------------Other-------------------->
         <tr>
             <td>
                 <button name="testlink">テストページ</button>
@@ -124,6 +117,7 @@
                 <input type="button" id="del_cookie" value="Delete" onclick="deleteCookie()">
             </td>
         </tr>
+
     </table>
 </form>
 

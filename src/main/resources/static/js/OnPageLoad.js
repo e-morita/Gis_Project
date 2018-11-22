@@ -188,54 +188,14 @@ function setCurLocation() {
     navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true});
 }
 
-//--------------------------------------------------------------------------------------------------------------------
-//地図の表示切り替え
-
-function Display(no) {
-    if (no == "no1") {
-        document.getElementById("mapid").style.display = "block";
-        document.getElementById("maphide").style.display = "none";
-    } else if (no == "no2") {
-        document.getElementById("mapid").style.display = "none";
-        document.getElementById("maphide").style.display = "block";
-    }
-}
-
+//-------------------------------------------------------------------------------------------------------------------
+//スクロール
 $(function () {
-    $('.accbox label').prevAll().hide();
-    $('.accbox label').click(function () {
-        if ($(this).prevAll().is(':hidden')) {
-            $(this).prevAll().slideDown();
-            $(this).text('close').addClass('close');
-        } else {
-            $(this).prevAll().slideUp();
-            $(this).text('Open').removeClass('close');
-        }
+    $('.accbox').on('click', function () {
+        $(window).scrollTop(0);
     });
-});
 
-(function ($) {
-// 読み込んだら開始
-   $(function () {
-
-// アコーディオン
-        $(".accordion").each(function () {
-            var accordion = $(this);
-            $(this).find(".switch").click(function () {
-//$("> .switch", this).click(function() { // 上段の別の書き方
-                var targetContentWrap = $(this).next(".contentWrap");
-                if (targetContentWrap.css("display") === "none") {
-                    accordion.find(".contentWrap").slideUp();
-                    accordion.find(".switch.open").removeClass("open");
-                }
-                targetContentWrap.slideToggle();
-                $(this).toggleClass("open");
-            });
-        });
-
-    });
-})(jQuery);
-
+})
 
 //-------------------------------------------------------------------------------------------------------------------
 //LINEid
@@ -262,8 +222,28 @@ function initApp(data) {
 }
 
 //-------------------------------------------------------------------------------------------------------------------
+//サムネ表示
+$(function () {
+    $('#upload').click(function () {
+        $('#file').click();
+    });
 
+    function setImage() {
+        for (var i = 0; i < this.files.length; i++) {
+            var file = this.files[i];
+            fr = new FileReader();
+            fr.onload = function (e) {
+                var img = $('<img>');
+                img.attr('src', e.target.result);
+                img.css('height', '160px');
+                $('#results').append(img);
+            };
+            fr.readAsDataURL(file);
+        }
+    }
 
+    $('#file').on('change', setImage);
+});
 //-------------------------------------------------------------------------------------------------------------------
 //sendMessage
 function sendMessage() {
