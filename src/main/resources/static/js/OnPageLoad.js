@@ -12,7 +12,6 @@ var detail = "detail";
 var latitude = "lat";
 var longitude = "lng";
 
-
 window.onload = function (e) {
 
     //初期設定
@@ -38,7 +37,6 @@ function drawMap() {
         minZoom: 13,
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, '
     }).addTo(mymap);
-
 
     function onLocationFound(e) {
         //現段階（10月ではまだ住所変換できてないので緯度・経度のまま）
@@ -75,7 +73,6 @@ function drawMap() {
     mymap.locate({setView: true, maxZoom: 16, minZoom: 13, timeout: 20000, enableHighAccuracy: true});
 
 }
-
 
 //--------------------------------------------------------------------------------------------------------------------
 //選択肢の制御
@@ -188,14 +185,34 @@ function setCurLocation() {
     navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true});
 }
 
+
 //-------------------------------------------------------------------------------------------------------------------
 //スクロール
-$(function () {
-    $('.accbox').on('click', function () {
-        $(window).scrollTop(0);
+$(function(){
+    // 最初のdd要素以外は隠す
+    $("dd:not()").after().hide();
+
+    //　dt.accordionのクリック処理
+    $(".cssacc").click(function(){
+        // 一旦dd要素をすべて閉じる
+        $("dd").slideUp();
+        // dt要素からオープン用フラグclassの"flag"を削除
+        $("dt").removeClass("flag");
+        // クリックされたdt要素がオープン用フラグclassの"flag"を持っているか？
+        if(!$(this).hasClass("flag")){
+            // 自身に"flag"classを追加し、次の要素(dd)をスライドダウン　⇒
+            $(this).addClass("flag").next().slideDown(function(){
+                // ページスクロールさせるためのドキュメント高さ位置を変数scrollPointに代入（※dt要素の高さも合わせて）
+                var scrollPoint = $(this).offset().top - $(".cssacc").height() ;
+                // オープンしたメニュー先頭までスクロール
+                $('body,html').animate({ scrollTop : scrollPoint});
+                return false;
+
+            });
+        }
     });
 
-})
+});
 
 //-------------------------------------------------------------------------------------------------------------------
 //LINEid
