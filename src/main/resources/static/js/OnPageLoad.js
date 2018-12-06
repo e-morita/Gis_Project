@@ -33,10 +33,20 @@ function drawMap() {
     mymap = L.map('mapid');
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
+        maxZoom: 20,
         minZoom: 13,
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, '
     }).addTo(mymap);
+
+    // var option = {
+    //     position: 'topright', // topright, topleft, bottomright, bottomleft
+    //     text: '検索',
+    //     placeholder: '検索条件を入力してください。'
+    // };
+    // var osmGeocoder = new L.Control.OSMGeocoder(option);
+    // mymap.addControl(osmGeocoder);
+    // var osmGeocoder = new L.Control.OSMGeocoder(option);
+    // mymap.addControl(osmGeocoder);
 
     function onLocationFound(e) {
         //現段階（10月ではまだ住所変換できてないので緯度・経度のまま）
@@ -69,7 +79,7 @@ function drawMap() {
     mymap.on('locationerror', onLocationError);
     mymap.on('click', onMapClick);
 
-    //Androidで位置情報が取れないやつ回避
+//Androidで位置情報が取れないやつ回避
     mymap.locate({setView: true, maxZoom: 16, minZoom: 13, timeout: 20000, enableHighAccuracy: true});
 
 }
@@ -188,30 +198,22 @@ function setCurLocation() {
 
 //-------------------------------------------------------------------------------------------------------------------
 //スクロール
-$(function(){
-    // 最初のdd要素以外は隠す
-    $("dd:not()").after().hide();
-
-    //　dt.accordionのクリック処理
-    $(".cssacc").click(function(){
-        // 一旦dd要素をすべて閉じる
-        $("dd").slideUp();
-        // dt要素からオープン用フラグclassの"flag"を削除
-        $("dt").removeClass("flag");
-        // クリックされたdt要素がオープン用フラグclassの"flag"を持っているか？
-        if(!$(this).hasClass("flag")){
+$(function () {
+    //　.cssaccのクリック処理
+    $(".cssacc").click(function () {
+        if (!$(this).hasClass("flag")) {
             // 自身に"flag"classを追加し、次の要素(dd)をスライドダウン　⇒
-            $(this).addClass("flag").next().slideDown(function(){
+            $(this).addClass("flag").next().slideDown(function () {
                 // ページスクロールさせるためのドキュメント高さ位置を変数scrollPointに代入（※dt要素の高さも合わせて）
-                var scrollPoint = $(this).offset().top - $(".cssacc").height() ;
+                var scrollPoint = $(this).offset().top - $(".cssacc").height();
                 // オープンしたメニュー先頭までスクロール
-                $('body,html').animate({ scrollTop : scrollPoint});
+                $('body,html').animate({scrollTop: scrollPoint});
                 return false;
 
             });
         }
+        // クリックされたdt要素がオープン用フラグclassの"flag"を持っているか？
     });
-
 });
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -238,29 +240,6 @@ function initApp(data) {
 
 }
 
-//-------------------------------------------------------------------------------------------------------------------
-//サムネ表示
-$(function () {
-    $('#upload').click(function () {
-        $('#file').click();
-    });
-
-    function setImage() {
-        for (var i = 0; i < this.files.length; i++) {
-            var file = this.files[i];
-            fr = new FileReader();
-            fr.onload = function (e) {
-                var img = $('<img>');
-                img.attr('src', e.target.result);
-                img.css('height', '160px');
-                $('#results').append(img);
-            };
-            fr.readAsDataURL(file);
-        }
-    }
-
-    $('#file').on('change', setImage);
-});
 //-------------------------------------------------------------------------------------------------------------------
 //sendMessage
 function sendMessage() {
